@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderCreateRequest;
+use App\Exceptions\RunTimeException;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+
 use App\User;
 use App\Order;
 use App\OrderItem;
+use DB;
 
 class OrderController extends Controller
 {
@@ -20,64 +24,33 @@ class OrderController extends Controller
         $this->orderItem = $orderItem;
     }
 
-    public function create(Request $request) {
+    public function create(OrderCreateRequest $request) {
         
-        # Validate request
-        $validation = Validator::make(
-            $request->all(), [
-                'items' => 'required|array',
-                'deliveryCharge' => 'required',
-                'subTotal' => 'required',
-                'grandTotal' => 'required',
-                'name' => 'required',
-                'email' => 'required',
-                'address' => 'required',
-                'currencyId' => 'required',
-            ]);
-
-        if ($validation->fails()) 
-        {
-            $message = $validation->errors()->all();
-            $data = ['error' => true, 'msg' => $message[0]];
-            return response()->json($data, Response::HTTP_BAD_REQUEST);
-        }
+        $payload = $request->validated();
         
-        $user = $this->user->create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-        ]);
+        DB::beginTransaction();
         
-        // return response()->json($user, Response::HTTP_OK);
-        
-
-        $result = $this->order->create([
-            'user_id' => $user->id,
-            'sub_total' => $request->subTotal,
-            'delivery_charge' => $request->deliveryCharge,
-            'grand_total' => $request->grandTotal,
-            'currency_id' => $request->currencyId,
-            'delivery_address' => $request->address
-        ]);
-
-        if ($result) 
-        {
-            $data = [
-                'status' => true,
-                'msg' => 'Order created successfully',
-                'data' => $result,
-            ]; // success
-        } 
-        else 
-        {
-            $data = [
-                'status' => false,
-                'msg' => 'Order not created',
-                'data' => $result,
-            ]; // success
+        if (!$user = $this->user->createUser($payload)) {
+            DB::rollBack();
+            throw RunTimeException::badRequest();
         }
 
-        return response()->json($data, Response::HTTP_OK);
+        if (!$order = $this->order->createOrder($payload, $user)) {
+            DB::rollBack();
+            throw RunTimeException::badRequest();
+        }
+        
+        foreach ($payload['items'] as $key => $value) 
+        {
+            if (!$result = $this->orderItem->createOrderItem($value, $order)) {
+                DB::rollBack();
+                throw RunTimeException::badRequest();
+            }
+        }
+        
+        DB::commit();
+
+        return response()->json($order, Response::HTTP_OK);
     }
     
 }

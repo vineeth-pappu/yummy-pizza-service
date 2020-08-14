@@ -31,5 +31,13 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+    
+    public function createUser($requset) {
+        return $this->create([
+            'name' => $requset['name'],
+            'email' => $requset['email'],
+            'address' => $requset['address'],
+        ]);
+    }
 
 }

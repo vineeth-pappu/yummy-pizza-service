@@ -12,6 +12,17 @@ class OrderItem extends Model
      * @var string
      */
     protected $table = 'order_items';
+    
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'order_id', 'product_id', 'quantity', 'price_per_quantity'
+    ];
+    
 
     /**
      * The attributes that should be hidden for arrays.
@@ -25,5 +36,15 @@ class OrderItem extends Model
     public function item()
     {
         return $this->belongsTo('App\Product');
+    }
+    
+    public function createOrderItem($request, $order)
+    {
+        return $this->orderItem->create([
+                'order_id' => $order->id,
+                'product_id' => $request['id'],
+                'quantity' => $request['quantity'],
+                'price_per_quantity' => $request['price']
+            ]);
     }
 }

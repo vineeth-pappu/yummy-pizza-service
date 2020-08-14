@@ -11,9 +11,7 @@
         "laravel/framework": "5.5.*",
         "laravel/passport": "^4.0",
         "laravel/tinker": "~1.0",
-        "spatie/laravel-tail": "^3.0",
-        "twilio/sdk": "^5.16",
-        "cartalyst/stripe-laravel": "7.0.*"
+        "spatie/laravel-tail": "^3.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
@@ -23,9 +21,6 @@
         "symfony/thanks": "^1.0"
     },
     "autoload": {
-        "files": [
-            "app/Helper/Helper.php"
-        ],
         "classmap": [
             "database/seeds",
             "database/factories",
@@ -42,8 +37,7 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": [
-            ]
+            "dont-discover": []
         }
     },
     "scripts": {
@@ -56,6 +50,10 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover"
+        ],
+        "post-install-cmd": [
+            "php artisan clear-compiled",
+            "chmod -R 777 public/"
         ]
     },
     "config": {

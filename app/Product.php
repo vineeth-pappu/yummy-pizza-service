@@ -15,6 +15,15 @@ class Product extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
     
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+    
     public function productType() {
         return $this->belongsTo('App\ProductType');
     }

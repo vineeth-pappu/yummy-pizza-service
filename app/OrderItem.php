@@ -40,7 +40,7 @@ class OrderItem extends Model
     
     public function createOrderItem($request, $order)
     {
-        return $this->orderItem->create([
+        return $this->create([
                 'order_id' => $order->id,
                 'product_id' => $request['id'],
                 'quantity' => $request['quantity'],

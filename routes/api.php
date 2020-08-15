@@ -13,5 +13,8 @@
 
  
 Route::get('/product', 'ProductController@getProducts')->middleware('cors');
+
 Route::post('/order', 'OrderController@create')->middleware('cors');
+
+Route::get('/currency', 'CurrencyController@getAvailableCurrencies')->middleware('cors');
 
